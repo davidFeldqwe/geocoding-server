@@ -6,10 +6,15 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@elysiajs/cors": "^0.7.1",
+    "@googlemaps/google-maps-services-js": "^3.3.41",
+    "axios": "^1.5.1",
+    "elysia": "^0.7.16"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/googlemaps": "^3.43.3",
+    "bun-types": "latest",
+    "install": "^0.13.0"
   },
   "module": "src/index.js"
 }

@@ -88,8 +88,8 @@ async function geocodeWithWaze(address: Address) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  const wazeURL = `https://www.waze.com/live-map/api/autocomplete?q=${address.full_address
-    }&v=33.38327644404132,34.2795153896776%3B29.395314745725695,35.055000047183896&lang=he-IL&exp=`
+  const wazeURL = `https://www.waze.com/live-map/api/autocomplete?q=${encodeURI(address.full_address
+    )}&v=33.38327644404132,34.2795153896776%3B29.395314745725695,35.055000047183896&lang=he-IL&exp=`
 
 
   try {

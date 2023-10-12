@@ -4,6 +4,8 @@ import { Address, WazeAddress } from "./types";
 import { addresses } from "./addresses";
 import { Client, GeocodeResponse } from "@googlemaps/google-maps-services-js";
 
+import { geocodeAddressWithWaze } from './waze-geocoder';
+
 // Example usage
 export async function findCoordinates() {
 
@@ -56,26 +58,13 @@ function onReturn(res: GeocodeResponse | null, addressId: number) {
 }
 
 // Function to process Waze geocoding response
-function onReturnWaze(response: WazeAddress | null, addressId: number): string {
-  if (response) {
-    const coordinates = response.latLng;
-    if (coordinates) {
-      const averageLat = coordinates.lat;
-      const averageLng = coordinates.lng;
-
-      console.log(`latitude: ${averageLat}, longitude: ${averageLng}`);
-
-      // Update the coordinates in your addresses array or storage
-      addresses[addressId].coordinates = {
-        lat: averageLat,
-        lng: averageLng,
-      };
-
-      return `latitude: ${averageLat}, longitude: ${averageLng}`;
-    }
-  }
-
-  throw new Error("Waze response does not contain valid coordinates");
+function onReturnWaze(coordinates: { lat: number; lon: number; } | null, addressId: number): string {
+  if (!coordinates) throw new Error('Waze response does not contain valid coordinates');
+  addresses[addressId].coordinates = {
+    lat: coordinates.lat,
+    lng: coordinates.lon,
+  };
+  return `latitude: ${coordinates.lat}, longitude: ${coordinates.lon}`;
 }
 
 // Function to geocode an address using the Waze API
@@ -87,30 +76,12 @@ async function geocodeWithWaze(address: Address) {
   function delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-
-  const wazeURL = `https://www.waze.com/live-map/api/autocomplete?q=${encodeURI(address.full_address
-    )}&v=33.38327644404132,34.2795153896776%3B29.395314745725695,35.055000047183896&lang=he-IL&exp=`
-
-
-  try {
-    const response: AxiosResponse<WazeAddress[]> = await axios.get(wazeURL);
-    if (response.status === 200) {
-      const data = response.data;
-      if (data && data.length > 0) {
-        // Extract coordinates from Waze response
-        const result = onReturnWaze(data[0], address.id);
-        // Delay the next request
-        await delay(throttleDelayMs);
-
-        return result;
-      }
-    }
-  } catch (error) {
-    console.error("Waze geocoding error:", error);
-  }
-
-  // Return null if Waze geocoding fails
-  return null;
+  
+  const coordinates = await geocodeAddressWithWaze(address.full_address);
+  if (!coordinates) return null;
+  const result = onReturnWaze(coordinates, address.id);
+  await delay(throttleDelayMs);
+  return result;
 }
 
 // Function to geocode an address using the Google Geocoding API

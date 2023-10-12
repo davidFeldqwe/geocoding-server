@@ -21,7 +21,7 @@ async function geocodeAddressWithMozi(query: string) {
     },
   );
   if (response.status === 404) return null; // waze unable to find a place for given query
-  const firstVenueUsingWazeNewProvider = response.data.find((entry) => entry.provider === 'wazeAddressNew');
+  const firstVenueUsingWazeNewProvider = response.data.find((entry: any) => entry.provider === 'wazeAddressNew');
   if (!firstVenueUsingWazeNewProvider) return null; // none of the returned entries from waze satisfies our constraint
   const location = firstVenueUsingWazeNewProvider.venue.location;
   return {

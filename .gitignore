@@ -40,3 +40,11 @@ yarn-error.log*
 **/*.log
 package-lock.json
 **/*.bun
+
+.obsidain
+
+!.obsidian/community-plugins.json
+!.obsidian/core-plugins.json
+!.obsidian/core-plugins-migration.json
+
+.obsidian/*

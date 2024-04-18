@@ -1,9 +1,10 @@
-import { Address } from "./types";
+import { Address } from "./common/types/types";
 
-import { Client, GeocodeResponse } from "@googlemaps/google-maps-services-js";
-import { addresses } from "./full_address_miklatim";
+import { Client } from "@googlemaps/google-maps-services-js";
+import { addresses } from "./common/consts/full_address_miklatim";
 
 import { geocodeAddressWithWaze } from "./waze-geocoder";
+import { geocodeWithGoogle } from "./common/functions";
 
 // Example usage
 export async function findCoordinates() {
@@ -26,32 +27,8 @@ export async function findCoordinates() {
     }
   }
   const data = JSON.stringify(addresses);
+  console.log("Geocoding data:", data);
   console.log("Geocoding complete!");
-}
-
-function onReturn(res: GeocodeResponse | null, addressId: number) {
-  if (!res) throw new Error("response returned null");
-
-  const southWest = res.data.results[0].geometry.viewport.southwest;
-  const northEast = res.data.results[0].geometry.viewport.northeast;
-
-  const southLat = southWest.lat;
-  const northLat = northEast.lat;
-  const westLng = southWest.lng;
-  const eastLng = northEast.lng;
-
-  const averageLat = (southLat + northLat) / 2;
-  const averageLng = (westLng + eastLng) / 2;
-
-  console.log(`latitude: ${averageLat}, longitude: ${averageLng}`);
-  addresses[addressId].coordinates = {
-    lat: averageLat,
-    lng: averageLng,
-  };
-
-  addresses[addressId].isGoogle = true;
-
-  return `latitude: ${averageLat}, longitude: ${averageLng}`;
 }
 
 // Function to process Waze geocoding response
@@ -83,25 +60,6 @@ async function geocodeWithWaze(address: Address) {
   const result = onReturnWaze(coordinates, address.id);
   await delay(throttleDelayMs);
   return result;
-}
-
-// Function to geocode an address using the Google Geocoding API
-async function geocodeWithGoogle(address: Address, geocoder: Client) {
-  try {
-    const results = await geocoder.geocode({
-      params: {
-        key: process.env.apikey ?? "REDACTED_KEY",
-        address: address.full_address,
-        region: "il",
-      },
-    });
-    return onReturn(results, address.id);
-  } catch (error) {
-    console.error(`Geocoding error for ${address.full_address}: ${error}`);
-  }
-
-  // Return null if Google geocoding fails
-  return null;
 }
 
 // Function to perform geocoding with fallback to Google if Waze fails

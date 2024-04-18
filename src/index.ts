@@ -1,26 +1,14 @@
 import { Elysia } from "elysia";
-import { cors } from '@elysiajs/cors'
-import { addressesWIthCoordinates } from "./addressWIthCoordinates"
+import { cors } from "@elysiajs/cors";
+import { findCoordinates } from "./main";
 
 const app = new Elysia()
   .use(cors())
   .get("/", () => {
-    addressesWIthCoordinates.forEach(obj => {
-      if (obj.isGoogle) {
-        console.log("googleAPI");
-      } else {
-        console.log("wazeAPI");
-      }
-    });
-
-  }).listen(8000);
+    findCoordinates();
+  })
+  .listen(8081);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
-
-
-
-
-
-

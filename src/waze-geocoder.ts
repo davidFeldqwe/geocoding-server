@@ -42,7 +42,7 @@ async function geocodeAddressWithLivemap(query: string) {
       },
     }
   );
-  if (!response.data) return null;
+  if (!response.data || !response.data[0]) return null;
   return response.data[0].latLng as { lat: number; lon: number };
 }
 
